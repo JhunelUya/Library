@@ -1,195 +1,215 @@
-# Library Management API
+Library Management System API
+=============================
 
-## Description
+This Library Management System API is built using PHP and the Slim framework. It provides functionalities for user registration, authentication, and management of books and authors in a library. The API uses JWT (JSON Web Tokens) for secure access control and stores tokens in a MySQL database.
 
-This project is a RESTful API for managing a library system. It allows users to register, log in, manage authors, and books, and establish relationships between books and authors. The API utilizes JSON Web Tokens (JWT) for authentication and provides secure access to endpoints.
+Table of Contents
+-----------------
 
-## Features
+*   About the Project
+    
+*   Features
+    
+*   Requirements
+    
+*   Installation
+    
+*   API Endpoints
+    
+    *   User Registration
+        
+    *   User Login
+        
+    *   Create Author
+        
+    *   Update Author
+        
+    *   Delete Author
+        
+    *   Create Book
+        
+    *   Update Book
+        
+    *   Delete Book
+        
+    *   Create Book-Author Relations
+        
+    *   Delete Book-Author Relations
+        
 
-- User registration and authentication
-- Create, update, and delete authors
-- Create, update, and delete books
-- Manage book-author relationships
-- Token-based authentication with JWT
-- Automatic deletion of expired tokens
+About the Project
+-----------------
 
-## Technologies Used
+The Library Management System API allows users to manage a library's collection of books and authors efficiently. It enables users to register and log in securely while managing their sessions through JWTs. The API provides endpoints for CRUD (Create, Read, Update, Delete) operations on both authors and books, as well as the ability to create and delete relationships between books and authors. This project is designed to be a foundational framework for a more extensive library management system, allowing for future enhancements and integrations.
 
-- PHP
-- Slim Framework
-- MySQL
-- JSON Web Tokens (JWT)
-- PDO for database interactions
+Features
+--------
 
-## Installation
+*   User registration and authentication
+    
+*   Token-based access control
+    
+*   Create, update, and delete authors
+    
+*   Create, update, and delete books
+    
+*   Manage book-author relationships
+    
+*   Token expiration and validation
+    
 
-### Prerequisites
+Requirements
+------------
 
-- PHP 7.2 or higher
-- Composer
-- MySQL database
-- A web server (e.g., Apache, Nginx)
+*   PHP 7.2 or higher
+    
+*   Composer
+    
+*   MySQL
+    
+*   Slim Framework
+    
+*   Firebase JWT library
+    
 
-### Steps
+Installation
+------------
 
-1. **Clone the repository:**
-
-   ```bash
-   git clone https://github.com/yourusername/library-management-api.git
-   cd library-management-api
-Install dependencies:
-
-Make sure you have Composer installed, then run:
-
-bash
-
-Verify
-
-Open In Editor
-Edit
-Copy code
-composer install
-Set up the database:
-
-Create a MySQL database named library and run the following SQL commands to create the necessary tables:
-
-sql
-
-Verify
-
-Open In Editor
-Edit
-Copy code
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE authors (
-    authorid INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
-);
-
-CREATE TABLE books (
-    bookid INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    authorid INT,
-    FOREIGN KEY (authorid) REFERENCES authors(authorid) ON DELETE SET NULL
-);
-
-CREATE TABLE books_authors (
-    collectionid INT AUTO_INCREMENT PRIMARY KEY,
-    bookid INT,
-    authorid INT,
-    FOREIGN KEY (bookid) REFERENCES books(bookid) ON DELETE CASCADE,
-    FOREIGN KEY (authorid) REFERENCES authors(authorid) ON DELETE CASCADE
-);
-
-CREATE TABLE jwt_tokens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    token VARCHAR(255) NOT NULL,
-    used TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-Configure database connection:
-
-Edit the database connection settings in the PHP code where $servername, $username, $password, and $dbname are defined to match your MySQL configuration.
-
-Usage
-Running the API
-To run the API, you can use the built-in PHP server or configure it with a web server like Apache or Nginx. To use the built-in server, run:
-
-bash
-
-Verify
-
-Open In Editor
-Edit
-Copy code
-php -S localhost:8000 -t public
-You can now access the API at http://localhost:8000.
+1.  bashVerifyOpen In EditorEditCopy code1git clone 2cd
+    
+2.  bashVerifyOpen In EditorEditCopy code1composer install
+    
+3.  Set up your MySQL database:
+    
+    *   Create a database named **library**.
+        
+    *   sqlVerifyOpen In EditorEditCopy code1CREATE TABLE users (2 id INT AUTO\_INCREMENT PRIMARY KEY,3 username VARCHAR(255) NOT NULL UNIQUE,4 password VARCHAR(255) NOT NULL5);67CREATE TABLE authors (8 authorid INT AUTO\_INCREMENT PRIMARY KEY,9 name VARCHAR(255) NOT NULL10);1112CREATE TABLE books (13 bookid INT AUTO\_INCREMENT PRIMARY KEY,14 title VARCHAR(255) NOT NULL,15 authorid INT,16 FOREIGN KEY (authorid) REFERENCES authors(authorid)17);1819CREATE TABLE books\_authors (20 collectionid INT AUTO\_INCREMENT PRIMARY KEY,21 bookid INT,22 authorid INT,23 FOREIGN KEY (bookid) REFERENCES books(bookid),24 FOREIGN KEY (authorid) REFERENCES authors(authorid)25);2627CREATE TABLE jwt\_tokens (28 id INT AUTO\_INCREMENT PRIMARY KEY,29 token VARCHAR(512) NOT NULL,30 used TINYINT DEFAULT 0,31 created\_at DATETIME DEFAULT CURRENT\_TIMESTAMP32);
+        
+4.  Update database credentials in the code if necessary.
+    
 
 API Endpoints
-Here are the available API endpoints:
+-------------
 
-User Registration
-POST /user/register
-Request Body:
-json
+### User Registration
 
-Verify
+*   **POST** **/user/register**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "username": "your\_username",3 "password": "your\_password"4}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": null,4 "data": null5}
+        
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "fail",3 "token": null,4 "data": {5 "title": "Username already exists."6 }7}
+        
 
-Open In Editor
-Edit
-Copy code
-{
-  "username": "your_username",
-  "password": "your_password"
-}
-Response:
-json
+### User Login
 
-Verify
+*   **POST** **/user/login**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "username": "your\_username",3 "password": "your\_password"4}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "your\_jwt\_token",4 "data": null5}
+        
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "fail",3 "token": null,4 "data": {5 "title": "Authentication Failed"6 }7}
+        
 
-Open In Editor
-Edit
-Copy code
-{
-  "status": "success",
-  "token": null,
-  "data": null
-}
-User Login
-POST /user/login
-Request Body:
-json
+### Create Author
 
-Verify
+*   **POST** **/authors**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "name": "Author Name",3 "token": "your\_jwt\_token"4}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": " new\_jwt\_token",4 "data": null5}
+        
 
-Open In Editor
-Edit
-Copy code
-{
-  "username": "your_username",
-  "password": "your_password"
-}
-Response:
-json
+### Update Author
 
-Verify
+*   **PUT** **/authors/{authorid}**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "name": "Updated Author Name",3 "token": "your\_jwt\_token"4}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "new\_jwt\_token",4 "data": null5}
+        
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "fail",3 "token": null,4 "data": {5 "title": "Author not found."6 }7}
+        
 
-Open In Editor
-Edit
-Copy code
-{
-  "status": "success",
-  "token": "your_jwt_token",
-  "data": null
-}
-Manage Authors
-Create Author: POST /authors
-Update Author: PUT /authors/update/{id}
-Delete Author: DELETE /authors/delete/{id}
-Manage Books
-Create Book: POST /books
-Update Book: PUT /books/update/{id}
-Delete Book: DELETE /books/delete/{id}
-Manage Book-Author Relations
-Create Relation: POST /books_authors
-Delete Relation: DELETE /books_authors/delete/{id}
-Authentication
-For endpoints that require authentication, include the JWT token in the request body:
+### Delete Author
 
-json
+*   **DELETE** **/authors/{authorid}**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "token": "your\_jwt\_token"3}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "new\_jwt\_token",4 "data": null5}
+        
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "fail",3 "token": null,4 "data": {5 "title": "Author not found."6 }7}
+        
 
-Verify
+### Create Book
 
-Open In Editor
-Edit
-Copy code
-{
-  "token": "your_jwt_token"
-}
-Token Expiration
-Tokens are valid for 1 hour. After expiration, users must log in again to receive a new token.
+*   **POST** **/books**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "title": "Book Title",3 "authorid": "author\_id",4 "token": "your\_jwt\_token"5}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "new\_jwt\_token",4 "data": null5}
+        
+
+### Update Book
+
+*   **PUT** **/books/{bookid}**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "title": "Updated Book Title",3 "authorid": "author\_id",4 "token": "your\_jwt\_token"5}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "new\_jwt\_token",4 "data": null5}
+        
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "fail",3 "token": null,4 "data": {5 "title": "Book not found."6 }7}
+        
+
+### Delete Book
+
+*   **DELETE** **/books/{bookid}**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "token": "your\_jwt\_token"3}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "new\_jwt\_token",4 "data": null5}
+        
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "fail",3 "token": null,4 "data": {5 "title": "Book not found."6 }7}
+        
+
+### Create Book-Author Relations
+
+*   **POST** **/books/authors**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "bookid": "book\_id",3 "authorid": "author\_id",4 "token": "your\_jwt\_token"5}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "new\_jwt\_token",4 "data": null5}
+        
+
+### Delete Book-Author Relations
+
+*   **DELETE** **/books/authors**
+    
+*   jsonVerifyOpen In EditorEditCopy code1{2 "bookid": "book\_id",3 "authorid": "author\_id",4 "token": "your\_jwt\_token"5}
+    
+*   Response:
+    
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "success",3 "token": "new\_jwt\_token",4 "data": null5}
+        
+    *   jsonVerifyOpen In EditorEditCopy code1{2 "status": "fail",3 "token": null,4 "data": {5 "title": "Relation not found."6 }7}
