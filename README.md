@@ -1,337 +1,368 @@
-Library Management System API
-Overview
-This Library Management System API is built using PHP and the Slim Framework. It offers functionality for managing books, authors, and user authentication via JWT (JSON Web Tokens). It includes secure user registration, login, and CRUD operations for books and authors, as well as the ability to create and delete relationships between books and authors. This system is ideal for managing a library collection with a focus on scalability and security.
+# Library Management System API
 
-Table of Contents
-About the Project
-Features
-Requirements
-Installation
-Database Setup
-API Endpoints
-User Registration
-User Login
-Create Author
-Update Author
-Delete Author
-Create Book
-Update Book
-Delete Book
-Create Book-Author Relations
-Delete Book-Author Relations
-License
-About the Project
-The Library Management System API enables users to interact with a library database through a RESTful interface. This API supports user registration and authentication using JWTs for secure access. The main focus of this project is to provide CRUD operations for managing authors and books, as well as managing the relationships between them. This API is designed to be extensible and can serve as the backend for a more complex library management system.
+This Library Management System API is built using PHP and the Slim framework. It provides functionalities for user registration, authentication, and management of books and authors in a library. The API uses JWT (JSON Web Tokens) for secure access control and stores tokens in a MySQL database.
 
-Features
-User Registration & Authentication: Secure user registration and login with JWT-based token authentication.
-CRUD Operations for Authors: Create, read, update, and delete author records in the system.
-CRUD Operations for Books: Create, read, update, and delete books.
-Manage Book-Author Relationships: Associate authors with books and manage those relationships.
-Token Expiration & Validation: Expired tokens are automatically rejected to enforce security.
-Requirements
-PHP 7.2 or higher
-Composer (Dependency Manager for PHP)
-MySQL Database
-Slim Framework 4.x
-Firebase JWT (for token generation and validation)
-Installation
-1. Clone the repository
-bash
-Copy code
-git clone <repository-url>
-cd <repository-directory>
-2. Install dependencies
-Make sure Composer is installed on your system, then run:
+## Table of Contents
+- [About the Project](#about-the-project)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [API Endpoints](#api-endpoints)
+  - [User Registration](#user-registration)
+  - [User Login](#user-login)
+  - [Create Author](#create-author)
+  - [Update Author](#update-author)
+  - [Delete Author](#delete-author)
+  - [Create Book](#create-book)
+  - [Update Book](#update-book)
+  - [Delete Book](#delete-book)
+  - [Create Book-Author Relations](#create-book-author-relations)
+  - [Delete Book-Author Relations](#delete-book-author-relations)
+- [Project Information](#project-information)
+- [Contact Information](#contact-information)
 
-bash
-Copy code
-composer install
-3. Set up your MySQL database
-Create a database called library:
+## About the Project
 
-sql
-Copy code
-CREATE DATABASE library;
-Next, create the required tables:
+The Library Management System API allows users to manage a library's collection of books and authors efficiently. It enables users to register and log in securely while managing their sessions through JWTs. The API provides endpoints for CRUD (Create, Read, Update, Delete) operations on both authors and books, as well as the ability to create and delete relationships between books and authors. This project is designed to be a foundational framework for a more extensive library management system, allowing for future enhancements and integrations.
 
-sql
-Copy code
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-);
+## Features
+- User registration and authentication
+- Token-based access control
+- Create, update, and delete authors
+- Create, update, and delete books
+- Manage book-author relationships
+- Token expiration and validation
 
-CREATE TABLE authors (
-    authorid INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
+## Requirements
+- PHP 7.2 or higher
+- Composer
+- MySQL
+- Slim Framework
+- Firebase JWT library
 
-CREATE TABLE books (
-    bookid INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    authorid INT,
-    FOREIGN KEY (authorid) REFERENCES authors(authorid)
-);
+## Installation
 
-CREATE TABLE books_authors (
-    collectionid INT AUTO_INCREMENT PRIMARY KEY,
-    bookid INT,
-    authorid INT,
-    FOREIGN KEY (bookid) REFERENCES books(bookid),
-    FOREIGN KEY (authorid) REFERENCES authors(authorid)
-);
+1. Clone the repository:
+    ```bash
+    git clone <repository-url>
+    cd <repository-directory>
+    ```
 
-CREATE TABLE jwt_tokens (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    token VARCHAR(512) NOT NULL,
-    used TINYINT DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-4. Configure database credentials
-Update the database credentials in your config.php file, ensuring that it connects to your MySQL database properly.
+2. Install dependencies using Composer:
+    ```bash
+    composer install
+    ```
 
-API Endpoints
-User Registration
-POST /user/register
-Request Body:
-json
-Copy code
-{
-    "username": "your_username",
-    "password": "your_password"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": null,
-    "data": null
-}
-Error Response:
-json
-Copy code
-{
-    "status": "fail",
-    "token": null,
-    "data": {
-        "title": "Username already exists."
+3. Set up your MySQL database:
+    - Create a database named `library`.
+    - Create the following tables:
+
+    ```sql
+    CREATE TABLE users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    );
+
+    CREATE TABLE authors (
+        authorid INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL
+    );
+
+    CREATE TABLE books (
+        bookid INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        authorid INT,
+        FOREIGN KEY (authorid) REFERENCES authors(authorid)
+    );
+
+    CREATE TABLE books_authors (
+        collectionid INT AUTO_INCREMENT PRIMARY KEY,
+        bookid INT,
+        authorid INT,
+        FOREIGN KEY (bookid) REFERENCES books(bookid),
+        FOREIGN KEY (authorid) REFERENCES authors(authorid)
+    );
+
+    CREATE TABLE jwt_tokens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        token VARCHAR(512) NOT NULL,
+        used TINYINT DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    ```
+
+4. Update database credentials in the code if necessary.
+
+## API Endpoints
+
+### User Registration
+- **POST** `/user/register`
+- Request Body:
+    ```json
+    {
+        "username": "your_username",
+        "password": "your_password"
     }
-}
-User Login
-POST /user/login
-Request Body:
-json
-Copy code
-{
-    "username": "your_username",
-    "password": "your_password"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "your_jwt_token",
-    "data": null
-}
-Error Response:
-json
-Copy code
-{
-    "status": "fail",
-    "token": null,
-    "data": {
-        "title": "Authentication Failed"
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": null,
+          "data": null
+      }
+      ```
+    - Fail:
+      ```json
+      {
+          "status": "fail",
+          "token": null,
+          "data": {
+              "title": "Username already exists."
+          }
+      }
+      ```
+
+### User Login
+- **POST** `/user/login`
+- Request Body:
+    ```json
+    {
+        "username": "your_username",
+        "password": "your_password"
     }
-}
-Create Author
-POST /authors
-Request Body:
-json
-Copy code
-{
-    "name": "Author Name",
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Update Author
-PUT /authors/{authorid}
-Request Body:
-json
-Copy code
-{
-    "name": "Updated Author Name",
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Error Response:
-json
-Copy code
-{
-    "status": "fail",
-    "token": null,
-    "data": {
-        "title": "Author not found."
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "your_jwt_token",
+          "data": null
+      }
+      ```
+    - Fail:
+      ```json
+      {
+          "status": "fail",
+          "token": null,
+          "data": {
+              "title": "Authentication Failed"
+          }
+      }
+      ```
+
+### Create Author
+- **POST** `/authors`
+- Request Body:
+    ```json
+    {
+        "name": "Author Name",
+        "token": "your_jwt_token"
     }
-}
-Delete Author
-DELETE /authors/{authorid}
-Request Body:
-json
-Copy code
-{
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Error Response:
-json
-Copy code
-{
-    "status": "fail",
-    "token": null,
-    "data": {
-        "title": "Author not found."
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+
+### Update Author
+- **PUT** `/authors/{authorid}`
+- Request Body:
+    ```json
+    {
+        "name": "Updated Author Name",
+        "token": "your_jwt_token"
     }
-}
-Create Book
-POST /books
-Request Body:
-json
-Copy code
-{
-    "title": "Book Title",
-    "authorid": "author_id",
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Update Book
-PUT /books/{bookid}
-Request Body:
-json
-Copy code
-{
-    "title": "Updated Book Title",
-    "authorid": "author_id",
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Error Response:
-json
-Copy code
-{
-    "status": "fail",
-    "token": null,
-    "data": {
-        "title": "Book not found."
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+    - Fail:
+      ```json
+      {
+          "status": "fail",
+          "token": null,
+          "data": {
+              "title": "Author not found."
+          }
+      }
+      ```
+
+### Delete Author
+- **DELETE** `/authors/{authorid}`
+- Request Body:
+    ```json
+    {
+        "token": "your_jwt_token"
     }
-}
-Delete Book
-DELETE /books/{bookid}
-Request Body:
-json
-Copy code
-{
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Error Response:
-json
-Copy code
-{
-    "status": "fail",
-    "token": null,
-    "data": {
-        "title": "Book not found."
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+    - Fail:
+      ```json
+      {
+          "status": "fail",
+          "token": null,
+          "data": {
+              "title": "Author not found."
+          }
+      }
+      ```
+
+### Create Book
+- **POST** `/books`
+- Request Body:
+    ```json
+    {
+        "title": "Book Title",
+        "authorid": "author_id",
+        "token": "your_jwt_token"
     }
-}
-Create Book-Author Relations
-POST /books/authors
-Request Body:
-json
-Copy code
-{
-    "bookid": "book_id",
-    "authorid": "author_id",
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Delete Book-Author Relations
-DELETE /books/authors
-Request Body:
-json
-Copy code
-{
-    "bookid": "book_id",
-    "authorid": "author_id",
-    "token": "your_jwt_token"
-}
-Response:
-json
-Copy code
-{
-    "status": "success",
-    "token": "new_jwt_token",
-    "data": null
-}
-Error Response:
-json
-Copy code
-{
-    "status": "fail",
-    "token": null,
-    "data": {
-        "title": "Relation not found."
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+
+### Update Book
+- **PUT** `/books/{bookid}`
+- Request Body:
+    ```json
+    {
+        "title": "Updated Book Title",
+        "authorid": "author_id",
+        "token": "your_jwt_token"
     }
-}
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+    - Fail:
+      ```json
+      {
+          "status": "fail",
+          "token": null,
+          "data": {
+              "title": "Book not found."
+          }
+      }
+      ```
+
+### Delete Book
+- **DELETE** `/books/{bookid}`
+- Request Body:
+    ```json
+    {
+        "token": "your_jwt_token"
+    }
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+    - Fail:
+      ```json
+      {
+          "status": "fail",
+          "token": null,
+          "data": {
+              "title": "Book not found."
+          }
+      }
+      ```
+
+### Create Book-Author Relations
+- **POST** `/books/authors`
+- Request Body:
+    ```json
+    {
+        "bookid": "book_id",
+        "authorid": "author_id",
+        "token": "your_jwt_token"
+    }
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+
+### Delete Book-Author Relations
+- **DELETE** `/books/authors`
+- Request Body:
+    ```json
+    {
+        "bookid": "book_id",
+        "authorid": "author_id",
+        "token": "your_jwt_token"
+    }
+    ```
+- Response:
+    - Success:
+      ```json
+      {
+          "status": "success",
+          "token": "new_jwt_token",
+          "data": null
+      }
+      ```
+    - Fail:
+      ```json
+      {
+          "status": "fail",
+          "token": null,
+          "data": {
+              "title": "Relation not found."
+          }
+      }
+      ```
+
+## Project Information
+
+This project is developed as part of a midterm requirement for the ITPC 115 (System Integration and Architecture) subject, showcasing the ability to build secure API endpoints and manage user and data operations efficiently.
+
+## Contact Information
+
+- Developer: Jhunel M. Uya(Kuyep)
+- Email: uy4s1nk1t@gmail.com
