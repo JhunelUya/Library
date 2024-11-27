@@ -1,188 +1,195 @@
 # Library Management API
 
-This project is a RESTful API built with the Slim PHP framework that allows users to manage a library system. It includes functionalities for user registration, login, JWT authentication, and CRUD operations for authors and books. The API uses JWT tokens to authenticate and authorize users.
+## Description
+
+This project is a RESTful API for managing a library system. It allows users to register, log in, manage authors, and books, and establish relationships between books and authors. The API utilizes JSON Web Tokens (JWT) for authentication and provides secure access to endpoints.
 
 ## Features
 
-- User registration and login
+- User registration and authentication
+- Create, update, and delete authors
+- Create, update, and delete books
+- Manage book-author relationships
 - Token-based authentication with JWT
-- Create, Update, and Delete Authors
-- Create, Update, and Delete Books
-- Create and Delete Book-Author relations
-- Secure API with token validation and expiration handling
+- Automatic deletion of expired tokens
 
-## Prerequisites
+## Technologies Used
 
-- PHP 7.4 or higher
-- Composer (for managing dependencies)
-- MySQL (or compatible database)
-- Firebase JWT library
+- PHP
+- Slim Framework
+- MySQL
+- JSON Web Tokens (JWT)
+- PDO for database interactions
 
 ## Installation
 
-### Step 1: Clone the Repository
+### Prerequisites
 
-```bash
-git clone https://github.com/yourusername/library-api.git
-cd library-api
-Step 2: Install Dependencies
+- PHP 7.2 or higher
+- Composer
+- MySQL database
+- A web server (e.g., Apache, Nginx)
+
+### Steps
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/library-management-api.git
+   cd library-management-api
+Install dependencies:
+
 Make sure you have Composer installed, then run:
 
 bash
+
+Verify
+
+Open In Editor
+Edit
 Copy code
 composer install
-This will install the necessary dependencies, including the Slim framework and Firebase JWT.
+Set up the database:
 
-Step 3: Configure the Database
-Create a MySQL database named library. Set up the following tables: users, jwt_tokens, authors, books, and books_authors based on the structure of your application.
+Create a MySQL database named library and run the following SQL commands to create the necessary tables:
 
-Step 4: Update Database Credentials
-Update the database credentials in the index.php file.
+sql
 
-php
+Verify
+
+Open In Editor
+Edit
 Copy code
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "library";
-Make sure the localhost, root, and library database values match your environment.
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
 
-Step 5: Run the Application
-Start the PHP built-in server:
+CREATE TABLE authors (
+    authorid INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE books (
+    bookid INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    authorid INT,
+    FOREIGN KEY (authorid) REFERENCES authors(authorid) ON DELETE SET NULL
+);
+
+CREATE TABLE books_authors (
+    collectionid INT AUTO_INCREMENT PRIMARY KEY,
+    bookid INT,
+    authorid INT,
+    FOREIGN KEY (bookid) REFERENCES books(bookid) ON DELETE CASCADE,
+    FOREIGN KEY (authorid) REFERENCES authors(authorid) ON DELETE CASCADE
+);
+
+CREATE TABLE jwt_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    used TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+Configure database connection:
+
+Edit the database connection settings in the PHP code where $servername, $username, $password, and $dbname are defined to match your MySQL configuration.
+
+Usage
+Running the API
+To run the API, you can use the built-in PHP server or configure it with a web server like Apache or Nginx. To use the built-in server, run:
 
 bash
+
+Verify
+
+Open In Editor
+Edit
 Copy code
-php -S localhost:8080 -t public
-The API should now be available at http://localhost:8080.
+php -S localhost:8000 -t public
+You can now access the API at http://localhost:8000.
 
 API Endpoints
+Here are the available API endpoints:
+
 User Registration
 POST /user/register
-
-Registers a new user. Requires a JSON body with username and password fields.
-
-Example:
-
+Request Body:
 json
+
+Verify
+
+Open In Editor
+Edit
 Copy code
 {
-  "username": "john_doe",
-  "password": "securepassword123"
+  "username": "your_username",
+  "password": "your_password"
+}
+Response:
+json
+
+Verify
+
+Open In Editor
+Edit
+Copy code
+{
+  "status": "success",
+  "token": null,
+  "data": null
 }
 User Login
 POST /user/login
-
-Authenticates a user and returns a JWT token. Requires a JSON body with username and password fields.
-
-Example:
-
+Request Body:
 json
+
+Verify
+
+Open In Editor
+Edit
 Copy code
 {
-  "username": "john_doe",
-  "password": "securepassword123"
+  "username": "your_username",
+  "password": "your_password"
 }
-Create Author
-POST /authors
-
-Adds a new author. Requires a JSON body with name and token (JWT token).
-
-Example:
-
+Response:
 json
+
+Verify
+
+Open In Editor
+Edit
 Copy code
 {
-  "name": "J.K. Rowling",
-  "token": "your-jwt-token"
+  "status": "success",
+  "token": "your_jwt_token",
+  "data": null
 }
-Update Author
-PUT /authors/update/{id}
-
-Updates an existing author's name. Requires id, name, and token in the request body.
-
-Example:
+Manage Authors
+Create Author: POST /authors
+Update Author: PUT /authors/update/{id}
+Delete Author: DELETE /authors/delete/{id}
+Manage Books
+Create Book: POST /books
+Update Book: PUT /books/update/{id}
+Delete Book: DELETE /books/delete/{id}
+Manage Book-Author Relations
+Create Relation: POST /books_authors
+Delete Relation: DELETE /books_authors/delete/{id}
+Authentication
+For endpoints that require authentication, include the JWT token in the request body:
 
 json
+
+Verify
+
+Open In Editor
+Edit
 Copy code
 {
-  "name": "J.K. Rowling (Updated)",
-  "token": "your-jwt-token"
+  "token": "your_jwt_token"
 }
-Delete Author
-DELETE /authors/delete/{id}
-
-Deletes an author by id. Requires token in the request body.
-
-Example:
-
-json
-Copy code
-{
-  "token": "your-jwt-token"
-}
-Create Book
-POST /books
-
-Adds a new book. Requires title, author_id, and token.
-
-Example:
-
-json
-Copy code
-{
-  "title": "Harry Potter",
-  "author_id": 1,
-  "token": "your-jwt-token"
-}
-Update Book
-PUT /books/update/{id}
-
-Updates an existing book's title and author. Requires id, title, author_id, and token.
-
-Example:
-
-json
-Copy code
-{
-  "title": "Harry Potter (Updated)",
-  "author_id": 1,
-  "token": "your-jwt-token"
-}
-Delete Book
-DELETE /books/delete/{id}
-
-Deletes a book by id. Requires token.
-
-Example:
-
-json
-Copy code
-{
-  "token": "your-jwt-token"
-}
-Create Book-Author Relation
-POST /books_authors
-
-Links a book and an author. Requires book_id, author_id, and token.
-
-Example:
-
-json
-Copy code
-{
-  "book_id": 1,
-  "author_id": 1,
-  "token": "your-jwt-token"
-}
-Delete Book-Author Relation
-DELETE /books_authors/delete/{id}
-
-Deletes a book-author relation by id. Requires token.
-
-Example:
-
-json
-Copy code
-{
-  "token": "your-jwt-token"
-}
+Token Expiration
+Tokens are valid for 1 hour. After expiration, users must log in again to receive a new token.
